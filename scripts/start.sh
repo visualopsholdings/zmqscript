@@ -1,14 +1,14 @@
 #!/bin/bash
 # 
-# Start zmqscript
+# Start ZMQScript
 
-if [ ! -f "zmqscript/build/zmqscript" ];
+if [ ! -f "zmqscript/build/ZMQScript" ];
 then
   echo "Need to build or install project first"
   exit 1
 fi
 
-LIST=`ps -ef | grep "build/zmqscript" | grep -v grep | awk '{print $2}'`
+LIST=`ps -ef | grep "build/ZMQScript" | grep -v grep | awk '{print $2}'`
 if [ ! -z "$LIST" ]; then
 	echo "Already running"
 	exit 0
@@ -23,6 +23,6 @@ else
   export DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH
 fi
 
-./zmqscript/build/zmqscript \
+./zmqscript/build/ZMQScript \
   --logLevel=debug \
   > zmqscript.log 2>&1 &
