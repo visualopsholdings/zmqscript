@@ -135,7 +135,7 @@ void Server::handle_reply(const zmq::message_t &reply) {
   ss << "/bin/bash -c \"";
   ss << *bash;
   ss << "\"";
-  system(ss.str().c_str());
+  auto _ = system(ss.str().c_str());
   
 }
 
