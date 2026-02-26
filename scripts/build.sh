@@ -16,5 +16,7 @@ pushd zmqscript/build
 git pull
 cmake ..
 make -j4
+[ "$?" != "0" ] && exit 1
 make test
+[ "$?" != "0" ] && exit 1
 popd
