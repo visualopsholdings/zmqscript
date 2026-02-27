@@ -30,14 +30,12 @@ DictG receive(zmq::socket_t &socket);
 int main(int argc, char *argv[]) {
 
   int pushPort;
-  int pullPort;
   string logLevel;
   string jsonstr;
   
   po::options_description desc("Allowed options");
   desc.add_options()
     ("pushPort", po::value<int>(&pushPort)->default_value(3008), "Port for producer, normally 3008.")
-    ("pullPort", po::value<int>(&pullPort)->default_value(3009), "Port for consumer, normally 3009.")
     ("logLevel", po::value<string>(&logLevel)->default_value("info"), "Logging level [trace, debug, warn, info].")
     ("json", po::value<string>(&jsonstr)->required(), "The JSON to send")
     ("help", "produce help message")

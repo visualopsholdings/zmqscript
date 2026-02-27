@@ -27,7 +27,7 @@ namespace vops {
 class Server {
 
 public:
-  Server(int pullPort, int pushPort, const string &commands);
+  Server(int pullPort, const string &commands);
     
   void run();
     // run the server.
@@ -35,7 +35,6 @@ public:
 private:
   zmq::context_t _context;
   zmq::socket_t _pull;
-  zmq::socket_t _push;
   map<string, DictO> _commands;
   
   void handle_reply(const zmq::message_t &reply);

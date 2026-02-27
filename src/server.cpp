@@ -17,8 +17,8 @@
 
 namespace vops {
 
-Server::Server(int pullPort, int pushPort, const string &commands): 
-    _context(1), _pull(_context, ZMQ_PULL), _push(_context, ZMQ_PUSH) {
+Server::Server(int pullPort, const string &commands): 
+    _context(1), _pull(_context, ZMQ_PULL) {
   
   // load up all of the commands.  
   auto cmds = Dict::parseFile(commands);
@@ -53,9 +53,6 @@ Server::Server(int pullPort, int pushPort, const string &commands):
   
   _pull.bind("tcp://*:" + to_string(pullPort));
   L_INFO("Consumer connected to port " << pullPort);
-    
-  _push.bind("tcp://*:" + to_string(pushPort));
-  L_INFO("Producer connected to port " << pushPort);
 
 }
     

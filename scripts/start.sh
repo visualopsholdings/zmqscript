@@ -25,4 +25,5 @@ fi
 
 ./zmqscript/build/ZMQScript \
   --logLevel=debug \
+  --commands=nodes/scripts/commands.json \
   > zmqscript.log 2>&1 &

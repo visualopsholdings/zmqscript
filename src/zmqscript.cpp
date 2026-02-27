@@ -31,13 +31,11 @@ int main(int argc, char *argv[]) {
 
   string logLevel;
   int pullPort;
-  int pushPort;
   string commands;
   
   po::options_description desc("Allowed options");
   desc.add_options()
     ("pullPort", po::value<int>(&pullPort)->default_value(3008), "Port for consumer, normally 3008.")
-    ("pushPort", po::value<int>(&pushPort)->default_value(3009), "Port for producer, normally 3009.")
     ("commands", po::value<string>(&commands)->default_value("../test/commands.json"), "List of commands to execute.")
     ("logLevel", po::value<string>(&logLevel)->default_value("info"), "Logging level [trace, debug, warn, info].")
     ("help", "produce help message")
@@ -77,7 +75,7 @@ int main(int argc, char *argv[]) {
   
   BOOST_LOG_TRIVIAL(info) << version;
   
-  Server server(pullPort, pushPort, commands);
+  Server server(pullPort, commands);
   server.run();
   
 }
