@@ -11,11 +11,15 @@
 
 #include "server.hpp"
 #include "log.hpp"
+#include "processor.hpp"
+#include "functions.hpp"
 
 #include <boost/log/trivial.hpp>
 #include <cstdlib>
 
 namespace vops {
+
+using namespace flo;
 
 Server::Server(int pullPort, const string &commands): 
     _context(1), _pull(_context, ZMQ_PULL) {
@@ -85,7 +89,16 @@ void Server::run() {
 #else
         auto res = _pull.recv(reply, zmq::recv_flags::none);
 #endif
-        handle_reply(reply);
+        // convert to JSON
+        string r((const char *)reply.data(), reply.size());
+      
+        auto doc = Dict::getObject(Dict::parseString(r));
+        if (!doc) {
+          L_ERROR("could not parse body to JSON object.");
+          return;
+        }
+        L_DEBUG("<- " << Dict::toString(*doc));
+        handle_reply(*doc);
       }
       catch (zmq::error_t &e) {
         BOOST_LOG_TRIVIAL(warning) << "got exc with _sub recv " << e.what() << "(" << e.num() << ")";
@@ -95,43 +108,54 @@ void Server::run() {
   
 }
 
-void Server::handle_reply(const zmq::message_t &reply) {
-
-  // convert to JSON
-  string r((const char *)reply.data(), reply.size());
-
-  auto doc = Dict::getObject(Dict::parseString(r));
-  if (!doc) {
-    L_ERROR("could not parse body to JSON object.");
-    return;
-  }
-  L_DEBUG("<- " << Dict::toString(*doc));
+optional<string> Server::process_reply(const DictO &doc) {
 
   // switch the handler based on the message type.
   auto type = Dict::getString(doc, "type");
   if (!type) {
     L_ERROR("no type");
-    return;
+    return nullopt;
   }
 
   // lookup the type in the commands.
   map<string, DictO>::iterator cmd = _commands.find(*type);
   if (cmd == _commands.end()) {
     L_ERROR("unknown reply type " << *type);
-    return;
+    return nullopt;
   }
   
-  auto bash = Dict::getString(cmd->second, "bash");
+  auto bash = Dict::getObject(cmd->second, "bash");
   if (!bash) {
-    L_ERROR("unknown underand bash");
-    return;
+    L_ERROR("unknown command bash");
+    return nullopt;
+  }
+  
+  auto input = dictO({});
+  
+  Functions f(*bash);
+  Processor p(f);
+  auto result = p.transform(*bash, input, Dict::getObject(doc, "args"));
+
+  if (!result) {
+     return nullopt;
+  }
+  
+  return Dict::getString(*result);
+  
+}
+
+void Server::handle_reply(const DictO &doc) {
+
+  auto result = process_reply(doc);  
+  if (!result) {
+     return;
   }
   
   // and execute in Bash.
   stringstream ss;
-  ss << "/bin/bash -c \"";
-  ss << *bash;
-  ss << "\"";
+  ss << "/bin/bash -c ";
+  ss << Dict::toString(*result);
+  L_TRACE(ss.str());
   auto _ = system(ss.str().c_str());
   
 }

@@ -32,13 +32,15 @@ public:
   void run();
     // run the server.
     
+  optional<string> process_reply(const DictO &doc);
+  
 private:
   zmq::context_t _context;
   zmq::socket_t _pull;
   map<string, DictO> _commands;
   
-  void handle_reply(const zmq::message_t &reply);
-  
+  void handle_reply(const DictO &doc);
+
 };
 
 } // vops

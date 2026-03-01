@@ -2,7 +2,26 @@
   {
     "type": "hello",
     "command": {
-      "bash": "echo Hello"
+      "bash": {
+        "library": [],
+        "transform": {
+          "string": "echo Hello World"
+        }
+      }
+    }
+  },
+  {
+    "type": "hellowithargs",
+    "command": {
+      "bash": {
+        "library": [],
+        "transform": {
+          "stringcat": [
+            { "string": "echo Hello " },
+            { "arg": "msg" }
+          ]
+        }
+      }
     }
   }
 ]
