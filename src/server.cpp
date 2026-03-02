@@ -25,12 +25,12 @@ Server::Server(int pullPort, const string &commands):
     _context(1), _pull(_context, ZMQ_PULL) {
   
   // load up all of the commands.  
-  auto cmds = Dict::parseFile(commands);
-  if (!cmds) {
+  auto doc = Dict::parseFile(commands);
+  if (!doc) {
     return;
   }
   
-  auto v = Dict::getVector(*cmds);
+  auto v = Dict::getVectorG(*doc, "commands");
   if (!v) {
     L_ERROR("no vector in " << commands);
     return;
@@ -42,9 +42,9 @@ Server::Server(int pullPort, const string &commands):
       return pair<string, DictO>("???", dictO({}));
     }
     L_TRACE(Dict::toString(*o));
-    auto type = Dict::getString(*o, "type");
+    auto type = Dict::getString(*o, "name");
     if (!type) {
-      L_ERROR("missing type");
+      L_ERROR("missing name");
       return pair<string, DictO>("???", dictO({}));
     }
     auto cmd = Dict::getObject(*o, "command");
@@ -54,6 +54,9 @@ Server::Server(int pullPort, const string &commands):
     }
     return pair<string, DictO>(*type, *cmd);
   });
+  
+  v = Dict::getVectorG(*doc, "library");
+  _library = v ? *v : DictV{};
   
   _pull.bind("tcp://*:" + to_string(pullPort));
   L_INFO("Consumer connected to port " << pullPort);
@@ -111,16 +114,16 @@ void Server::run() {
 optional<string> Server::process_reply(const DictO &doc) {
 
   // switch the handler based on the message type.
-  auto type = Dict::getString(doc, "type");
-  if (!type) {
-    L_ERROR("no type");
+  auto name = Dict::getString(doc, "name");
+  if (!name) {
+    L_ERROR("no name");
     return nullopt;
   }
 
-  // lookup the type in the commands.
-  map<string, DictO>::iterator cmd = _commands.find(*type);
+  // lookup the name in the commands.
+  map<string, DictO>::iterator cmd = _commands.find(*name);
   if (cmd == _commands.end()) {
-    L_ERROR("unknown reply type " << *type);
+    L_ERROR("unknown reply name " << *name);
     return nullopt;
   }
   
@@ -131,10 +134,13 @@ optional<string> Server::process_reply(const DictO &doc) {
   }
   
   auto input = dictO({});
-  
-  Functions f(*bash);
+  auto transform = dictO({
+    { "transform", *bash },
+    { "library", _library }
+  });
+  Functions f(transform);
   Processor p(f);
-  auto result = p.transform(*bash, input, Dict::getObject(doc, "args"));
+  auto result = p.transform(transform, input, Dict::getObject(doc, "args"));
 
   if (!result) {
      return nullopt;

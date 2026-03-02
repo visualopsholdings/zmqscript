@@ -38,6 +38,7 @@ private:
   zmq::context_t _context;
   zmq::socket_t _pull;
   map<string, DictO> _commands;
+  DictV _library;
   
   void handle_reply(const DictO &doc);
 

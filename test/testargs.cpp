@@ -19,27 +19,27 @@
 using namespace std;
 using namespace vops;
 
-BOOST_AUTO_TEST_CASE( noArgs )
+BOOST_AUTO_TEST_CASE( externArgs )
 {
-  cout << "=== noArgs ===" << endl;
+  cout << "=== externArgs ===" << endl;
   
   Server s(0, "../test/commands.json");
   auto obj = dictO({
-    { "type", "hello" }
+    { "name", "hello" }
   });
   auto r = s.process_reply(obj);
   BOOST_CHECK(r);
-  BOOST_CHECK_EQUAL(*r, "echo Hello World");
+  BOOST_CHECK_EQUAL(*r, "echo \"Hello World\"");
   
 }
 
-BOOST_AUTO_TEST_CASE( args )
+BOOST_AUTO_TEST_CASE( compoundArgs )
 {
-  cout << "=== args ===" << endl;
+  cout << "=== compoundArgs ===" << endl;
   
   Server s(0, "../test/commands.json");
   auto obj = dictO({
-    { "type", "hellowithargs" },
+    { "name", "hellowithargs" },
     { "args", dictO({
         { "msg", "World" }
       })
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( args )
   });
   auto r = s.process_reply(obj);
   BOOST_CHECK(r);
-  BOOST_CHECK_EQUAL(*r, "echo Hello World");
+  BOOST_CHECK_EQUAL(*r, "echo \"Hello World\"");
   
 }
 
