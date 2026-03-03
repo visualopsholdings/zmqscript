@@ -18,7 +18,7 @@ cmake ..
 if [ "$1" == "newflo" ]; then
   rm -rf _deps/flo-*
 fi
-make -j4
+make
 [ "$?" != "0" ] && exit 1
 make test
 [ "$?" != "0" ] && exit 1
