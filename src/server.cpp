@@ -22,41 +22,9 @@ namespace vops {
 using namespace flo;
 
 Server::Server(int pullPort, const string &commands): 
-    _context(1), _pull(_context, ZMQ_PULL) {
+    _context(1), _pull(_context, ZMQ_PULL), _commandsFile(commands) {
   
-  // load up all of the commands.  
-  auto doc = Dict::parseFile(commands);
-  if (!doc) {
-    return;
-  }
-  
-  auto v = Dict::getVectorG(*doc, "commands");
-  if (!v) {
-    L_ERROR("no vector in " << commands);
-    return;
-  }
-  transform(v->begin(), v->end(), inserter(_commands, _commands.end()), [](auto e) {
-    auto o = Dict::getObject(e);
-    if (!o) {
-      L_ERROR("not object");
-      return pair<string, DictO>("???", dictO({}));
-    }
-    L_TRACE(Dict::toString(*o));
-    auto type = Dict::getString(*o, "name");
-    if (!type) {
-      L_ERROR("missing name");
-      return pair<string, DictO>("???", dictO({}));
-    }
-    auto cmd = Dict::getObject(*o, "command");
-    if (!cmd) {
-      L_ERROR("missing command");
-      return pair<string, DictO>(*type, dictO({}));
-    }
-    return pair<string, DictO>(*type, *cmd);
-  });
-  
-  v = Dict::getVectorG(*doc, "library");
-  _library = v ? *v : DictV{};
+  reloadCommands();
   
   _pull.bind("tcp://*:" + to_string(pullPort));
   L_INFO("Consumer connected to port " << pullPort);
@@ -111,7 +79,53 @@ void Server::run() {
   
 }
 
+void Server::reloadCommands() {
+
+  // load up all of the commands.  
+  auto doc = Dict::parseFile(_commandsFile);
+  if (!doc) {
+    return;
+  }
+  
+  auto v = Dict::getVectorG(*doc, "commands");
+  if (!v) {
+    L_ERROR("no vector in " << _commandsFile);
+    return;
+  }
+  transform(v->begin(), v->end(), inserter(_commands, _commands.end()), [](auto e) {
+    auto o = Dict::getObject(e);
+    if (!o) {
+      L_ERROR("not object");
+      return pair<string, DictO>("???", dictO({}));
+    }
+    L_TRACE(Dict::toString(*o));
+    auto type = Dict::getString(*o, "name");
+    if (!type) {
+      L_ERROR("missing name");
+      return pair<string, DictO>("???", dictO({}));
+    }
+    auto cmd = Dict::getObject(*o, "command");
+    if (!cmd) {
+      L_ERROR("missing command");
+      return pair<string, DictO>(*type, dictO({}));
+    }
+    return pair<string, DictO>(*type, *cmd);
+  });
+  
+  v = Dict::getVectorG(*doc, "library");
+  _library = v ? *v : DictV{};
+
+}
+
 optional<string> Server::process_reply(const DictO &doc) {
+
+  auto reload = Dict::getBool(doc, "reload");
+  if (reload && *reload) {
+    // reload our commands.
+    L_INFO("reloading commands...");
+    reloadCommands();
+    return nullopt;
+  }
 
   // switch the handler based on the message type.
   auto name = Dict::getString(doc, "name");

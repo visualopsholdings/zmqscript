@@ -37,9 +37,11 @@ public:
 private:
   zmq::context_t _context;
   zmq::socket_t _pull;
+  string _commandsFile;
   map<string, DictO> _commands;
   DictV _library;
   
+  void reloadCommands();
   void handle_reply(const DictO &doc);
 
 };

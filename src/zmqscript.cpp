@@ -27,7 +27,7 @@ using namespace vops;
 
 int main(int argc, char *argv[]) {
 
-  string version = "ZMQScript v0.1.0, 24-Feb-2026.";
+  string version = "ZMQScript v0.2.0, 3-Mar-2026.";
 
   string logLevel;
   int pullPort;
