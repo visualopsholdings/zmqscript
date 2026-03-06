@@ -8,12 +8,12 @@ then
   exit 1
 fi
 
-uname -a | grep "6.17.0-1008-raspi"
-if [ "$?" == "0" ]; then
-  NPROC="-j2"
-else
+# uname -a | grep "6.17.0-1008-raspi"
+# if [ "$?" == "0" ]; then
+#   NPROC="-j2"
+# else
   NPROC="-j4"
-fi
+#fi
 
 echo "Building with $NPROC"
 
