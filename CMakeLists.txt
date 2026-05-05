@@ -59,7 +59,7 @@ set(BOOSTLIBS ${Boost_LOG_LIBRARY})
 
 include_directories(include)
 
-add_executable(ZMQScript src/zmqscript.cpp src/server.cpp ${ZMQ})
+add_executable(ZMQScript src/zmqscript.cpp src/server.cpp src/utils.cpp ${ZMQ})
     target_link_libraries(ZMQScript DictLib FloLib ${Boost_PROGRAM_OPTIONS_LIBRARY} ${LIBS})
 
 add_executable(Send test/send.cpp src/log.cpp ${ZMQ})
@@ -67,7 +67,7 @@ add_executable(Send test/send.cpp src/log.cpp ${ZMQ})
 
 # Tests
 
-add_executable(TestArgs test/testargs.cpp src/server.cpp ${ZMQ})
+add_executable(TestArgs test/testargs.cpp src/server.cpp src/utils.cpp ${ZMQ})
   target_link_libraries(TestArgs DictLib FloLib ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${BOOSTLIBS} ${LIBS})
 
 add_test(TestArgs TestArgs)

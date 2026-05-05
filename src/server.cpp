@@ -13,6 +13,7 @@
 #include "log.hpp"
 #include "processor.hpp"
 #include "functions.hpp"
+#include "utils.hpp"
 
 #include <boost/log/trivial.hpp>
 #include <cstdlib>
@@ -176,7 +177,7 @@ void Server::handle_reply(const DictO &doc) {
   ss << "/bin/bash -c ";
   ss << Dict::toString(*result);
   L_TRACE(ss.str());
-  auto _ = system(ss.str().c_str());
+  Utils::systemRun(ss.str().c_str(), true);
   
 }
 
