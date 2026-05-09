@@ -93,6 +93,7 @@ void Server::reloadCommands() {
     L_ERROR("no vector in " << _commandsFile);
     return;
   }
+  _commands.clear();
   transform(v->begin(), v->end(), inserter(_commands, _commands.end()), [](auto e) {
     auto o = Dict::getObject(e);
     if (!o) {
